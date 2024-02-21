@@ -1,0 +1,23 @@
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#container {
+    width: 100%;
+    height: 100%;
+}
+#panel {
+    position: absolute;
+    background: #FFF;
+    border: 1px solid rgb(88, 88, 88);
+    width:350px;
+    padding: 20px;
+    z-index: 9999;
+    top: 30px;
+    left: 30px;
+    box-shadow: rgb(0, 0, 0, 0.3) 0 0 10px;
+    border-radius: 15px;
+
+}

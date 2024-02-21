@@ -1,0 +1,301 @@
+﻿<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>上机4</title>
+    <link rel="stylesheet" href="exam.css" type="text/css" />
+    <script src="v5.3.0/build/ol.js" type="text/javascript" charset="utf-8"></script>
+</head>
+
+<body>
+
+    <div id="map" style="width:100%;height:100%;"></div>
+	<div class="toolbar-container">
+		<div>
+			<p><span>图层控制</span></p>
+		</div>
+		<div>
+			<input type="checkbox" class="layer-checkbox" id="layer-0" checked="checked">边界
+			<br>
+			<input type="checkbox" class="layer-checkbox" id="layer-1" checked="checked">面积
+			<br>
+			<input type="checkbox" class="layer-checkbox" id="layer-2" checked="checked">城市
+			<br>
+			<input type="checkbox" class="layer-checkbox" id="layer-3" checked="checked">主要公路
+		</div>
+		<div>
+			<button type="button" onclick="addInteraction()">多边形查询</button>
+			<button type="button" onclick="clearInteraction()">清除多边形</button>
+			<button type="button" onclick="clearQuery()">清除查询结果</button>
+		</div>
+		<div>
+			<input type="text" id="property-inp">
+			<button type="button" class="property-query">属性查询</button>
+		</div>
+	</div>
+	<div class="result-container">
+		<button type="button" class="result-close">关闭</button>
+		<table></table>
+	</div>
+
+	<script type="text/javascript">
+		// 添加底图
+		var map = new ol.Map({
+			layers: [new ol.layer.Tile({
+				source: new ol.source.OSM()
+			})],
+			target: 'map',
+			view: new ol.View({
+				center: [118.8, 30.6],
+				zoom: 5.8,
+				projection: 'EPSG:4326'
+			})
+		});
+
+		// 添加四个矢量图层
+
+		var area = new ol.layer.Vector({
+        source: new ol.source.Vector({
+            format: new ol.format.GeoJSON(),
+            url: 'http://localhost:9080/geoserver/wfs?service=wfs&version=1.1.0&request=GetFeature&typeNames=area&outputFormat=application/json&srsname=EPSG:3857'
+        }),
+        style: function (feature, resolution) {
+            return new ol.style.Style({
+				fill: new ol.style.Fill({
+				color: 'rgba(200, 200, 200, 0.7)',
+				})
+				});
+			}
+		});
+    	map.addLayer(area);
+		// area.setVisible(false);
+
+		var boundary = new ol.layer.Vector({
+        source: new ol.source.Vector({
+            format: new ol.format.GeoJSON(),
+            url: 'http://localhost:9080/geoserver/wfs?service=wfs&version=1.1.0&request=GetFeature&typeNames=boundary&outputFormat=application/json&srsname=EPSG:3857'
+        }),
+        style: function (feature, resolution) {
+            return new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: 'red',
+                    width: 2
+					})
+				});
+			}
+		});
+    	map.addLayer(boundary);
+
+		// const fill = new ol.style.Fill({
+		// color: 'rgba(255,255,255,0.4)',
+		// });
+		// const stroke = new ol.style.Stroke({
+		// color: '#3399CC',
+		// width: 1.25,
+		// });
+		// var cities = new ol.layer.Vector({
+        // source: new ol.source.Vector({
+        //     format: new ol.format.GeoJSON(),
+        //     url: 'http://localhost:9080/geoserver/wfs?service=wfs&version=1.1.0&request=GetFeature&typeNames=cities&outputFormat=application/json&srsname=EPSG:3857'
+        // }),
+        // style: function (feature, resolution) {
+        //     return new ol.style.Style({
+        //         // stroke: new ol.style.Stroke({
+        //         //     // color: 'red',
+        //         //     // width: 1
+		// 		// 	})
+
+		// 		image: new Circle({
+		// 		fill: fill,
+		// 		stroke: stroke,
+		// 		radius: 5,
+		// 		}),
+		// 		fill: fill,
+		// 		stroke: stroke,
+		// 	});
+		// 	}
+		// });
+    	// map.addLayer(cities);
+		// cities.setVisible(false);
+
+		var road = new ol.layer.Vector({
+        source: new ol.source.Vector({
+            format: new ol.format.GeoJSON(),
+            url: 'http://localhost:9080/geoserver/wfs?service=wfs&version=1.1.0&request=GetFeature&typeNames=road&outputFormat=application/json&srsname=EPSG:3857'
+        }),
+        style: function (feature, resolution) {
+            return new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: 'green',
+                    width: 2
+					})
+				});
+			}
+		});
+    	map.addLayer(road);
+
+
+		// 绘图图层
+		var drawSource = new ol.source.Vector({ wrapX: false });
+		var drawVector = new ol.layer.Vector({
+			source: drawSource
+		});
+		map.addLayer(drawVector);
+		// 绘制多边形
+		var feature;
+		function addInteraction() {
+			var draw = new ol.interaction.Draw({
+				source: drawSource,
+				type: "Polygon"
+			});
+			map.addInteraction(draw);
+			draw.on("drawend", function (evt) {
+				drawSource.clear();
+				feature = evt.feature;
+				console(feature.getGeometry());
+				map.removeInteraction(draw);
+				spatialQuery();
+			});
+		}
+
+		// 清除多边形
+		function clearInteraction() {
+			drawSource.clear();
+		}
+		// 清除查询结果
+		function clearQuery() {
+			spaceSource.clear();
+			document.querySelector(".result-container").style.display = "none";
+		}
+
+		// 查询结果显示图层
+		var spaceSource = new ol.source.Vector();
+		var spaceVector = new ol.layer.Vector({
+			source: spaceSource,
+			style: new ol.style.Style({
+				stroke: new ol.style.Stroke({
+					color: "rgba(255, 0, 255, 1.0)",
+					width: 2
+				})
+			})
+		});
+		map.addLayer(spaceVector);
+
+		// 空间查询
+		function spatialQuery() {
+			var featureRequest = new ol.format.WFS().writeGetFeature({
+				srsName: "EPSG:4326", // 坐标系
+				featureNS: "http://my.webgis.class/geoserver", // 命名空间
+				featurePrefix: "gislearn", // 工作区
+				featureTypes: ["road"], // 图层名
+				outputFormat: "application/json",
+				filter: ol.format.filter.intersects("the_geom", feature.getGeometry(), "EPSG:4326")// 选择
+			});
+
+			fetch("http://localhost:9080/geoserver/wfs", {
+				method: "POST",
+				body: new XMLSerializer().serializeToString(featureRequest)
+			})
+				.then(function (response) {
+					return response.json();
+				})
+				.then(function (json) {
+					showResultList(json);
+					var features = new ol.format.GeoJSON().readFeatures(json);
+					if (features.length == 0) {
+						alert("没有数据");
+					} else {
+						spaceSource.clear();
+						spaceSource.addFeatures(features);
+						// map.getView().fit(spaceSource.getExtent()); // 视图缩放至查询结果
+					}
+				});
+		}
+
+		// 展示空间查询结果列表
+		function showResultList(list) {
+			const { features } = list;
+			const propertyList = features.map(item => ({
+				id: item.id,
+				name: item.properties.NAME,
+				area: item.properties.SHAPE_Area
+			}));
+			const tableDOM = document.querySelector(".result-container table");
+			tableDOM.innerHTML = `
+		<tr class="head">
+					<th>id</th>
+					<th>名称</th>
+					<th>面积</th>
+				</tr>
+	`;
+			document.querySelector(".result-container").style.display = "block";
+			propertyList.forEach(item => {
+				const trDOM = document.createElement("tr");
+				trDOM.innerHTML = `
+		<tr>
+					<td>${item.id}</td>
+					<td>${item.name}</td>
+					<td>${item.area}</td>
+				</tr>
+		`;
+				tableDOM.appendChild(trDOM);
+			});
+		}
+
+		document.querySelector(".result-close").addEventListener("click", () => {
+			document.querySelector(".result-container").style.display = "none";
+		});
+
+		// 属性查询
+		function propertyQuery(queryStr) {
+			var featureRequest = new ol.format.WFS().writeGetFeature({
+				srsName: "EPSG:4326", // 坐标系
+				featureNS: "http://my.webgis.class/geoserver", // 命名空间
+				featurePrefix: "gislearn", // 工作区
+				featureTypes: ["road"], // 图层名
+				outputFormat: "application/json",
+				filter: ol.format.filter.like("NAME", `*${queryStr}*`)// 选择
+			});
+
+			fetch("http://localhost:9080/geoserver/wfs", {
+				method: "POST",
+				body: new XMLSerializer().serializeToString(featureRequest)
+			})
+				.then(function (response) {
+					return response.json();
+				})
+				.then(function (json) {
+					var features = new ol.format.GeoJSON().readFeatures(json);
+					spaceSource.clear();
+					spaceSource.addFeatures(features);
+					map.getView().fit(spaceSource.getExtent());
+				});
+		}
+		document.querySelector(".property-query").addEventListener("click", () => {
+			const str = document.querySelector("#property-inp").value;
+			propertyQuery(str);
+		});
+
+		// 图层控制
+		document.querySelectorAll(".layer-checkbox").forEach(item => {
+			item.addEventListener("click", e => {
+				const { id, checked } = e.target;
+				switch (id) {
+					case "layer-0":
+						boundary.set("visible", checked);
+						break;
+					case "layer-1":
+						area.set("visible", checked);
+						break;
+					case "layer-2":
+						cities.set("visible", checked);
+						break;
+					case "layer-3":
+						road.set("visible", checked);
+						break;
+				}
+			});
+		});
+	</script>
+</body>
+</html>

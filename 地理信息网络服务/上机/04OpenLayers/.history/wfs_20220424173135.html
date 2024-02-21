@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="exam.css" />
+    <script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.14.1/build/ol.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.14.1/css/ol.css">
+</head>
+<body>
+<div id="map" class="map"></div>
+</body>
+<script type="text/javascript">
+    var map1 = new ol.Map({
+        // 地图容器
+        target: 'map',
+        // 地图图层，比如底图、矢量图等
+
+        layers: [
+            new ol.layer.Tile({
+                // 设置图层的数据源
+                source: new ol.source.OSM()
+            })
+        ],
+        // 地图视野
+        view: new ol.View({
+            center: ol.proj.fromLonLat([-117.140, 34.215]),
+            zoom: 4,
+            projection:'EPSG:4326'
+        })
+
+    });
+
+    var canteenLayer = new ol.layer.Vector({
+        source: new ol.source.Vector({
+            format: new ol.format.GeoJSON(),
+            url: 'http://localhost:9080/geoserver/wfs?service=wfs&version=1.1.0&request=GetFeature&typeNames=canteen&outputFormat=application/json&srsname=EPSG:4326'
+        }),
+        style: function (feature, resolution) {
+            return new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: 'blue',
+                    width: 1
+                })
+            });
+        }
+    });
+    map1.addLayer(canteenLayer);
+</script>
+</html>

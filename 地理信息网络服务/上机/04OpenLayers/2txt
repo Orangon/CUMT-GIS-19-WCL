@@ -1,0 +1,14 @@
+		var house = new ol.layer.Vector({
+        source: new ol.source.Vector({
+            format: new ol.format.GeoJSON(),
+            url: 'http://localhost:8338/geoserver/wfs?service=wfs&version=1.1.0&request=GetFeature&typeNames=宿舍楼&outputFormat=application/json&srsname=EPSG:3857'
+        }),
+        style: function (feature, resolution) {
+            return new ol.style.Style({
+				fill: new ol.style.Fill({
+                    color: 'rgba(200, 200, 200, 0.7)',
+                    })
+                    });
+			}
+		});
+    	map.addLayer(house);

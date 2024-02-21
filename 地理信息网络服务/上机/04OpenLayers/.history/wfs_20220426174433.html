@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="exam.css" />
+    <script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.14.1/build/ol.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.14.1/css/ol.css">
+    <link rel="stylesheet" href="exam.css" type="text/css" />
+
+</head>
+<body>
+<div id="map" class="map"></div>
+<div class="toolbar-container">
+    <div>
+        <button type="button" onclick="polygonQuery()">多边形查询</button>
+    </div>
+</div>
+
+</body>
+<script type="text/javascript">
+    var map = new ol.Map({
+        // 地图容器
+        target: 'map',
+        // 地图图层，比如底图、矢量图等
+
+        layers: [
+            new ol.layer.Tile({
+                // 设置图层的数据源
+                source: new ol.source.OSM()
+            })
+        ],
+        // 地图视野
+        view: new ol.View({
+            // 117.140, 34.215
+            center: ol.proj.fromLonLat([118.8, 30.6]),
+            zoom: 5.8,
+            projection:'EPSG:3857'
+        })
+
+    });
+
+    var boundary = new ol.layer.Vector({
+        source: new ol.source.Vector({
+            format: new ol.format.GeoJSON(),
+            url: 'http://localhost:9080/geoserver/wfs?service=wfs&version=1.1.0&request=GetFeature&typeNames=boundary&outputFormat=application/json&srsname=EPSG:3857'
+        }),
+        style: function (feature, resolution) {
+            return new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: 'blue',
+                    width: 1
+                })
+            });
+        }
+    });
+    map.addLayer(boundary,false);
+
+    var china = new ol.layer.Vector({
+        source: new ol.source.Vector({
+            format: new ol.format.GeoJSON(),
+            url: 'http://localhost:9080/geoserver/wfs?service=wfs&version=1.1.0&request=GetFeature&typeNames=china3857&outputFormat=application/json&srsname=EPSG:3857'
+        }),
+        style: function (feature, resolution) {
+            return new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: 'red',
+                    width: 1
+                })
+            });
+        }
+    });
+    map.addLayer(china);
+
+		// 空间查询
+		function spatialQuery() {
+			var featureRequest = new ol.format.WFS().writeGetFeature({
+				srsName: "EPSG:3857", // 坐标系
+				featureNS: "http://my.webgis.class/geoserver", // 命名空间
+				featurePrefix: "gislearn", // 工作区
+				featureTypes: ["china"], // 图层名
+				outputFormat: "application/json",
+				filter: ol.format.filter.intersects("the_geom", feature.getGeometry(), "EPSG:4326")// 选择
+			});
+
+			fetch("http://localhost:9080/geoserver/wfs", {
+				method: "POST",
+				body: new XMLSerializer().serializeToString(featureRequest)
+			})
+				.then(function (response) {
+					return response.json();
+				})
+				.then(function (json) {
+					// showResultList(json);
+					var features = new ol.format.GeoJSON().readFeatures(json);
+					if (features.length == 0) {
+						alert("没有数据");
+					} else {
+						spaceSource.clear();
+						spaceSource.addFeatures(features);
+						// map.getView().fit(spaceSource.getExtent()); // 视图缩放至查询结果
+					}
+				});
+		}
+
+</script>
+</html>

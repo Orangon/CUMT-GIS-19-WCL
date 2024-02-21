@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+        <title>矿大南湖地图</title>
+        <script type="text/javascript" src="https://api.map.baidu.com/api?v=1.0&&type=webgl&ak=Hl2AwVmrVEvSFNBO4Q83kZZFkpMMpBBB"></script>
+        <script type="text/javascript" src="//api.map.baidu.com/api?v=3.0&ak=Hl2AwVmrVEvSFNBO4Q83kZZFkpMMpBBB"></script>
+        <script type="text/javascript" src="//api.map.baidu.com/api?type=webgl&v=1.0&ak=Hl2AwVmrVEvSFNBO4Q83kZZFkpMMpBBB"></script>
+        <style>
+        body,
+        html,
+        #container {
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            font-family: "微软雅黑";
+            z-index: 0;
+        }
+        .searchBox{
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            height: 50px;
+            width: 300px;
+            z-index: 1;
+            border: 2px solid #2196F3;
+            background-color: #ddffff;
+            box-shadow: rgb(0, 0, 0, 0.3) 0 0 10px;
+            border-radius: 5px;
+            padding: 2px;
+        }
+        #search{
+            position: relative;
+            margin: auto;
+            top: 17%;
+            height: 50%;
+            width: 35%;
+            padding: 5px;
+            padding-left: 20px;
+            font-size: 15px;
+            border-radius: 50px;
+            border: 0;
+            outline: none;
+        }
+        #searchBtn {
+            position: relative;
+            top: 17%;
+            height: 35px;
+            width: 50px;
+            padding: 3px;
+            border-radius: 50px;
+            background-color: rgb(51, 133, 255);
+            border: 0;
+        }
+        #searchResult{
+            position: absolute;
+            top: 90px;
+            left: 31px;
+            height: 100%;
+            width: 300px;
+            z-index: 1;
+            padding: 2px;
+        }
+
+        #routeBox {
+            position: absolute;
+            border: 2px solid rgb(76, 186, 37);
+            background-color: #bfff81;
+            top: 20px;
+            right: 40px;
+            height: 165px;
+            width: 250px;
+            z-index: 2;
+            box-shadow: rgba(0, 0, 0, 0.3) 0 0 10px;
+            border-radius: 15px;
+            padding: 5px;
+        }
+        input#start, input#end{
+            position: relative;
+            width: 170px;
+            height: 20px;
+            margin: 5px;
+            left: 5px;
+            border: 0;
+            border-radius: 5px;
+        }
+        div #routeBoxMode {
+            width: 150px;
+            position: relative;
+            left: 20%;
+            margin: 5px;
+        }
+        select#routeSelect {
+            position: relative;
+            left: 0;
+            width: 60px;
+            height: 22px;
+            border-style: outset;
+            border-radius: 5px;
+        }
+        div #routeSearchMode {
+            width: 150px;
+            position: relative;
+            left: 20%;
+            margin: 5px;
+        }
+        .routeSearch#auto {
+            background-color: aquamarine;
+            border-radius: 5px;
+            width: 48%;
+        }
+        .routeSearch#choose {
+            background-color: coral;
+            border-radius: 5px;
+            width: 48%;
+        }
+        #routeResult{
+            position: absolute;
+            top: 210px;
+            right: 40px;
+            width: 256px;
+            z-index: 1;
+            padding: 5px;
+        }
+    </style>
+    </head>
+
+    <body>
+    <!--地图容器-->
+    <div id="container"></div>
+
+    <!--搜索框-->
+    <div class="searchBox">
+        <label for="search" style="position: relative;top: 7px;left: 2px">请输入关键词：</label><input type="text" id="search" placeholder="超市/博学楼">
+        <button type="button" id="searchBtn" onclick="searchKey()">搜索
+        </button>
+        </div>
+    <div id="searchResult"></div>
+
+    <!--路线规划框-->
+    <div id="routeBox">
+        <p style="margin-bottom: 0">请输入路径的起点和终点：</p>
+        <label for="start">起点：</label><input type="text" id="start" placeholder="起点名称" value="一食堂">
+        <label for="end">终点：</label><input type="text" id="end" placeholder="终点名称" value="环境与测绘学院">
+        <div id="routeBoxMode">
+            <label for="routeSelect">选择模式：</label><select id="routeSelect">
+            <option value="walking">步行</option>
+            <option value="riding">骑行</option>
+            <option value="driving">驾车</option>
+        </select>
+        </div>
+        <div id="routeSearchMode">
+            <button type="button" class="routeSearch" id="auto" onclick="autoNevigation()">自动规划</button>
+            <button type="button" class="routeSearch" id="choose" onclick="chooseNevigation()">选点规划</button>
+        </div>
+
+    </div>
+    <!--路径规划结果-->
+    <div id="routeResult"></div>
+
+    </body>
+    
+</html>
+
+<script type="text/javascript" >
+    //创建地图实例
+    var map = new BMapGL.Map("container");
+    //设置中心点
+    var centerPoint = new BMapGL.Point(117.151767, 34.221332);
+    //地图初始化，同时设置地图展示级别
+    map.centerAndZoom(centerPoint, 16);
+    //开启鼠标滚轮缩放
+    map.enableScrollWheelZoom(true);
+    //添加控件
+    var scaleCtrl = new BMapGL.ScaleControl();  // 添加比例尺控件
+    map.addControl(scaleCtrl);
+    var zoomCtrl = new BMapGL.ZoomControl();  // 添加缩放控件
+    map.addControl(zoomCtrl);
+
+    // 本地关键词搜索
+    function searchKey(){
+        // 清空之前所有搜索记录
+        map.clearOverlays();
+        // 清空路径规划结果
+        var result = document.getElementById("routeResult");
+        if (result!=null)
+            result.innerHTML = '';
+        // 获取关键词
+        var keyWord = document.getElementById("search").value;
+        var options = {
+            renderOptions: {
+                map: map,
+                autoViewport: true,
+                panel: "searchResult"
+            }
+        }
+        var local =  new BMapGL.LocalSearch(map,options);
+        local.searchNearby(keyWord, centerPoint, 900);
+    }
+
+    // 自动规划
+    function autoNevigation(){
+        // 获取POI
+        // 清空之前所有搜索记录
+        map.clearOverlays();
+        // 获取关键词
+        var startKeyWord = document.getElementById("start").value;
+        var endKeyWord = document.getElementById("end").value;
+
+        var startPOI;
+        var endPOI;
+
+        var startOptions = {
+            onSearchComplete: function (results) {
+                // 判断状态是否正确
+                if (startLocal.getStatus() == BMAP_STATUS_SUCCESS) {
+                    // 返回第一个搜索结果作为路径规划的起点
+                    startPOI = results.getPoi(0);
+                    console.log(startPOI);
+                    var endOptions = {
+                        onSearchComplete: function (results) {
+                            // 判断状态是否正确
+                            if (endLocal.getStatus() == BMAP_STATUS_SUCCESS) {
+                                // 返回第一个搜索结果作为路径规划的终点
+                                endPOI = results.getPoi(0);
+                                // console.log(endPOI);
+                                var select = document.getElementById("routeSelect").value;
+                                if (select == 'walking')
+                                    walkingRouteSearch(startPOI,endPOI);
+                                else if (select == 'riding')
+                                    ridingRouteSearch(startPOI, endPOI);
+                                else
+                                    drivingRouteSearch(startPOI,endPOI);
+                            }
+                        }
+                    }
+                    var endLocal =  new BMapGL.LocalSearch(map,endOptions);
+                    endLocal.searchNearby(endKeyWord, centerPoint, 1000);
+                }
+            }
+        }
+        // 本地半径查询
+        var startLocal =  new BMapGL.LocalSearch(map,startOptions);
+        startLocal.searchNearby(startKeyWord, centerPoint, 1000);
+
+        // 骑行规划
+        function ridingRouteSearch(startPOI, endPOI){
+            // 清空搜索结果
+            var result = document.getElementById("searchResult");
+            if (result!=null)
+                result.innerHTML = '';
+
+            var riding = new BMapGL.RidingRoute(map, {
+                renderOptions: {
+                    map: map,
+                    panel: "routeResult",
+                    autoViewport: true
+                },
+            });
+            riding.search(startPOI, endPOI);
+        }
+        // 步行规划
+        function walkingRouteSearch(startPOI, endPOI){
+            // 清空搜索结果
+            var result = document.getElementById("searchResult");
+            if (result!=null)
+                result.innerHTML = '';
+
+            var walking = new BMapGL.WalkingRoute(map, {
+                renderOptions: {
+                    map: map,
+                    panel: "routeResult",
+                    autoViewport: true
+                },
+            });
+            walking.search(startPOI, endPOI);
+        }
+        //
+        function drivingRouteSearch(startPOI, endPOI){
+            // 清空搜索结果
+            var result = document.getElementById("searchResult");
+            if (result!=null)
+                result.innerHTML = '';
+
+            var driving = new BMapGL.DrivingRoute(map, {
+                renderOptions:{
+                    map: map,
+                    panel: "routeResult",
+                    autoViewport: true
+                }
+            });
+            driving.search(startPOI,endPOI);
+        }
+    }
+    // 选点规划
+    function chooseNevigation(){
+        map.clearOverlays();
+        var select = document.getElementById("routeSelect").value;
+        //获取起点和终点
+        var start = document.getElementById("start").value;
+        var end = document.getElementById("end").value;
+        //调用路线规划API
+        if(select== "walking"){
+            var walking = new BMapGL.WalkingRoute(
+                map, {
+                    renderOptions: {
+                        map: map,
+                        panel: "routeResult",
+                        autoViewport: true
+                    }
+                }
+            );
+
+            walking.search(start, end);
+        }
+        else {
+            var riding = new BMapGL.RidingRoute(
+                map, {
+                    renderOptions: {
+                        map: map,
+                        panel: "routeResult",
+                        autoViewport: true
+                    }
+                }
+            );
+            riding.search(start, end);
+        }
+
+    }
+
+</script>

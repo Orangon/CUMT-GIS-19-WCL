@@ -1,0 +1,14 @@
+{
+    // 使用 IntelliSense 了解相关属性。 
+    // 悬停以查看现有属性的描述。
+    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "pwa-chrome",
+            "request": "launch",
+            "name": "Open part.html",
+            "file": "e:\\学习资料\\大三下\\地理信息网络服务\\上机\\04OpenLayers\\part.html"
+        }
+    ]
+}

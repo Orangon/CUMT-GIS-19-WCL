@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://fastly.jsdelivr.net/npm/@bootcss/v3.bootcss.com@1.0.35/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="https://fastly.jsdelivr.net/npm/@bootcss/v3.bootcss.com@1.0.35/assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+
+    <link href="https://fastly.jsdelivr.net/npm/@bootcss/v3.bootcss.com@1.0.35/examples/signin/signin.css" rel="stylesheet">
+
+    <link rel="icon" href="./pic/Python.png">
+
+    <title>登录</title>
+    <script>
+        function check(){
+            //检查用户输入的信息是否正确，如果不正确显示错误信息。
+            userName = document.forms[0].userName.value;
+            pwd = document.forms[0].pwd.value;
+            if (userName == "wcl"&& pwd == "123456"){
+                //alert("输入信息正确！");
+                // window.location.href = 'www.baidu.com';
+                window.open("main.html")
+            }
+            else{
+                alert("输入信息错误！");
+            }
+        }
+    </script>
+
+</head>
+<body>
+
+    <div class="container">
+        <form class="form-signin">
+            <h2 class="form-signin-heading">请登录</h2>
+            <label for="userName" class="sr-only">用户名</label>
+            <input type="text" id="userName" class="form-control" maxlength="10" placeholder="用户名" value="wcl" required autofocus>
+            <label for="pwd" class="sr-only">密码</label>
+            <input type="password" id="pwd" class="form-control" maxlength="6" placeholder="密码" value="123456" required>
+            <div class="checkbox">
+            </div>
+            <button class="btn btn-lg btn-primary btn-block" type="submit" onclick="check()">登录</button>
+        </form>
+    </div> <!-- /container -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://fastly.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
+    <script>window.jQuery || document.write('<script src="https://fastly.jsdelivr.net/npm/@bootcss/v3.bootcss.com@1.0.35/assets/js/vendor/jquery.min.js"><\/script>')</script>
+    <script src="https://fastly.jsdelivr.net/npm/@bootcss/v3.bootcss.com@1.0.35/dist/js/bootstrap.min.js"></script>
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="https://fastly.jsdelivr.net/npm/@bootcss/v3.bootcss.com@1.0.35/assets/js/ie10-viewport-bug-workaround.js"></script>
+</body>
+</html>

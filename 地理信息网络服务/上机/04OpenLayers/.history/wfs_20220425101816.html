@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="exam.css" />
+    <script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.14.1/build/ol.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.14.1/css/ol.css">
+</head>
+<body>
+<div id="map" class="map"></div>
+</body>
+<script type="text/javascript">
+    var map = new ol.Map({
+        // 地图容器
+        target: 'map',
+        // 地图图层，比如底图、矢量图等
+
+        layers: [
+            new ol.layer.Tile({
+                // 设置图层的数据源
+                source: new ol.source.OSM()
+            })
+        ],
+        // 地图视野
+        view: new ol.View({
+            // 117.140, 34.215
+            center: ol.proj.fromLonLat([118.8, 30.6]),
+            zoom: 5.8,
+            projection:'EPSG:3857'
+        })
+
+    });
+
+    var boundary = new ol.layer.Vector({
+        source: new ol.source.Vector({
+            format: new ol.format.GeoJSON(),
+            url: 'http://localhost:9080/geoserver/wfs?service=wfs&version=1.1.0&request=GetFeature&typeNames=boundary&outputFormat=application/json&srsname=EPSG:3857'
+        }),
+        style: function (feature, resolution) {
+            return new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: 'blue',
+                    width: 1
+                })
+            });
+        }
+    });
+    map.addLayer(boundary,false);
+
+    var area = new ol.layer.Vector({
+        source: new ol.source.Vector({
+            format: new ol.format.GeoJSON(),
+            url: 'http://localhost:9080/geoserver/wfs?service=wfs&version=1.1.0&request=GetFeature&typeNames=area&outputFormat=application/json&srsname=EPSG:3857'
+        }),
+        style: function (feature, resolution) {
+            return new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: 'red',
+                    // width: 1
+                })
+            });
+        }
+    });
+    // map1.addLayer(area);
+
+    map.addInteraction(
+    new Draw({
+        type: 'Polygon',
+        source: source,
+    })
+    );
+
+</script>
+</html>

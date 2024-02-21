@@ -1,0 +1,61 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link href="css/lyan.css" rel="stylesheet" />
+    <script src="js/jquery.js"></script>
+    <script src="js/index.js"></script>
+    <title>留言板</title>
+</head>
+<body>
+    <header class="header jz">
+        <h1>麻 雀 虽 小 留 言 板</h1>
+        <div class="login jz"><a href="login.aspx">登录</a></div>
+    </header>
+    <div class="container">
+        <div class="contents">
+            <article class="comments">
+                <div class="left">
+                    <div class="hpic jz">
+                        <img src="pic/bilibili.png" style="height: 100px; width: 100px; border-radius: 50%;" />
+                    </div>
+                    <div class="uname jz" style="color: #1f99c2; margin-top: 10px;">
+                        <label style="width: 100px;"></label>
+                    </div>
+                </div>
+                <div class="right">
+                    <div class="ucontents">
+                        这是jack的留言...
+                    </div>
+                </div>
+                <div class="reply">
+                    <div style="margin-right: 15px; font-size: 12px;">
+                        <label id="lytime"></label></div>
+                </div>
+                <div class="clear"></div>
+            </article>
+            <article class="ly" id="message">
+                <div style="margin: 15px 20px 15px 15px;">
+                    <div style="margin-bottom: 10px;float: left;">发表留言：</div>
+                    <div style="margin-right: 10px;float: left;">
+                        <textarea id="ucontents2" style="width: 450px; height: 50px; font-size: 14px;"></textarea>
+                    </div>
+                    <div style="margin-bottom: 5px;float: left;">用户名：</div>
+                    <div style="margin-bottom: 10px;">
+                        <input id="uname2" type="text">
+                        （必填）
+                    </div>
+                    <div>
+                        <input id="btnMsg" type="button" style="width: 100px; height: 26px;" value="发表">
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+
+    <footer class="footer jz">
+        copyright@武成龙
+    </footer>
+
+</body>
+</html>

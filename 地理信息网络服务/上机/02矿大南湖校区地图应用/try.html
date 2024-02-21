@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>公交路线规划</title>
+</head>
+<script charset="utf-8" src="https://map.qq.com/api/gljs?v=1.exp&key=PLWBZ-X4XLD-RDR4G-HBVSI-XRKK2-HEBDC&libraries=service"></script>
+<style type="text/css">
+    html,
+    body {
+        height: 100%;
+        margin: 0px;
+        padding: 0px;
+        position: relative;
+    }
+
+    #container {
+        width: 100%;
+        height: 100%;
+    }
+    #panel {
+        position: absolute;
+        background: #FFF;
+        width:350px;
+        padding: 20px;
+        z-index: 9999;
+        top: 30px;
+        left: 30px;
+    }
+</style>
+
+<script type="text/javascript">
+    var map;
+    var startPosition = new TMap.LatLng(40.04134911365523, 116.27137911901514); // 路线规划起点
+    var endPosition = new TMap.LatLng(40.04134911365523, 116.253209380218); // 路线规划终点
+
+    function initMap() {
+        map = new TMap.Map("container", {
+            zoom: 13,
+            center: new TMap.LatLng(40.04134911365523, 116.353209380218),
+        });
+        var marker = new TMap.MultiMarker({ // 创造MultiMarker显示起终点标记
+            id: 'marker-layer',
+            map: map,
+            styles: {
+                start: new TMap.MarkerStyle({
+                    width: 25,
+                    height: 35,
+                    anchor: { x: 16, y: 32 },
+                    src: 'https://mapapi.qq.com/web/lbs/javascriptGL/demo/img/start.png',
+                }),
+                end: new TMap.MarkerStyle({
+                    width: 25,
+                    height: 35,
+                    anchor: { x: 16, y: 32 },
+                    src: 'https://mapapi.qq.com/web/lbs/javascriptGL/demo/img/end.png',
+                }),
+            },
+            geometries: [
+                {
+                    id: 'start',
+                    styleId: 'start',
+                    position: startPosition,
+                },
+                {
+                    id: 'end',
+                    styleId: 'end',
+                    position: endPosition,
+                },
+            ],
+        });
+        var polylineLayer = new TMap.MultiPolyline({  // 创建 MultiPolyline显示路径折线
+            map: map,
+            styles: {
+                'style_blue': new TMap.PolylineStyle({
+                    color: '#3777FF',
+                    width: 10,
+                    borderWidth: 0,
+                    showArrow: true,
+                    arrowOptions: {
+                        space: 70
+                    },
+                    lineCap: 'round',
+                }),
+            },
+            geometries:[],
+        });
+        // 新建一个步行规划类
+        var walking = new TMap.service.Walking();
+
+        walking.search({from:startPosition, to:endPosition}).then((result)=>{ //搜索路径
+            var route = result.result;// 路线方案
+            var instructionContainer = document.getElementById('instruction');// 要显示的位置
+            var rainbowPaths = [];//
+            route.forEach((route)=>{
+                //一条完整公交路线可能会包含多种公共交通工具，各交通工具的换乘由步行路线串联起来，
+                // 形成这样的结构（即 steps数组的结构）： [步行 , 公交 , 步行 , 公交 , 步行(到终点)]
+                // if(route.mode === "walking") {
+                    rainbowPaths.push({path: route.polyline, color: 'rgba(51, 51, 255, 1)',}); //绘制步行路线
+                    instructionContainer.innerHTML += `<h5>步行（${route.duration}分钟）</h5>`;
+                    route.steps && route.steps.forEach((subStep, index)=>{//对内容和索引分别遍历
+                        instructionContainer.innerHTML += `<p>${index+1}. ${subStep.instruction}</p>` // 显示步行指引
+                    });
+                // }
+                // else {
+                //     route.lines.forEach((line)=>{
+                //
+                //         if(line.vehicle === 'SUBWAY') {
+                //             rainbowPaths.push({path: line.polyline, color: 'rgba(245, 185, 23, 1)'}); //绘制地铁路线
+                //         } else {
+                //             rainbowPaths.push({path: line.polyline, color: 'rgba(28, 204, 108, 1)'}); //绘制非地铁公交路线
+                //         }
+                //         instructionContainer.innerHTML += `<h5>搭乘${line.title}（${line.duration}分钟）</h5>`; // 显示搭乘指引
+                //         instructionContainer.innerHTML += `<p>上车站：${line.geton.title}</p>`;
+                //         instructionContainer.innerHTML += `<p>下车站：${line.getoff.title}</p>`;
+                //     });
+                // }
+            });
+            polylineLayer.updateGeometries([{
+                styleId: 'style_blue',
+                rainbowPaths: rainbowPaths,
+            }])
+        });
+
+    }
+</script>
+
+
+<body onload="initMap()">
+<div id="container"></div>
+<div id="panel"><h4>步行路线规划</h4><div id="instruction"></div></div>
+</body>
+
+</html>
