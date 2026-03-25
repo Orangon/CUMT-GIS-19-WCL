@@ -21,3 +21,13 @@ ChatGPT 于 2022 年底横空出世，开启了 **AIGC** 时代
 > 都看到这了，右上角给学长点个 Star 吧
 > 
 > 你也可以通过 🍠 联系我：767378815
+
+## Star History
+
+<a href="https://www.star-history.com/?repos=Orangon%2FCUMT-GIS-19-WCL&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/image?repos=Orangon/CUMT-GIS-19-WCL&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/image?repos=Orangon/CUMT-GIS-19-WCL&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/image?repos=Orangon/CUMT-GIS-19-WCL&type=date&legend=top-left" />
+ </picture>
+</a>
